@@ -286,15 +286,12 @@ def damerau_intermediate_edicion(x, y, threshold=None):
 def damerau_intermediate(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
     # COMPLETAR Y REEMPLAZAR ESTA PARTE
-    #----------------------------------------
-    #     REVISAR ESTA PARTE
-    # ---------------------------------------
     lenX, lenY = len(x), len(y)
     vec1 = np.zeros(lenX + 1, dtype=np.int)
     vec2 = np.zeros(lenX + 1, dtype=np.int)
     vec3 = np.zeros(lenX + 1, dtype=np.int)
     vec4 = np.zeros(lenX + 1, dtype=np.int)
-    rreglaNum = 0
+    reglaNum = 0
     regla2Num = 0
     regla3Num = 0
     for i in range(1, lenX + 1):
@@ -330,7 +327,7 @@ def damerau_intermediate(x, y, threshold):
             if(vec2[i] < threshold): paradaPorThreshold = False
             elif(vec2[i] == threshold and lenX - i == lenY - j): paradaPorThreshold = False
         if(paradaPorThreshold): return threshold+1  
-        vec1, vec2, vec3, vec4 = vec2, vec3, vec4, vec1
+        vec1, vec2, vec3, vec4 = vec2, vec4, vec1, vec3
     return vec1[lenX]
 
 
