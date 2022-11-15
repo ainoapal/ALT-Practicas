@@ -1,0 +1,8 @@
+casa 4 [0, 0, 4, 9, 17]
+[[], [], ['acaso', 'camas', 'cañas', 'saca'], ['ancas', 'calzas', 'cartas', 'claras', 'sacar', 'sacara', 'sacas', 'sacó', 'seca'], ['acusare', 'altas', 'ancha', 'armas', 'buscara', 'celadas', 'cesaría', 'criadas', 'cuantas', 'haces', 'sacado', 'sacará', 'sacaré', 'secta', 'tachas', 'toscana', 'zancas']]
+ancho 4 [0, 0, 0, 2, 27]
+[[], [], [], ['canto', 'noche'], ['boca', 'ca', 'cabo', 'camino', 'caos', 'caro', 'caso', 'choza', 'con', 'cuando', 'cuanto', 'echado', 'ha', 'hace', 'hacen', 'hago', 'han', 'hato', 'hincar', 'nace', 'nacido', 'nací', 'noches', 'oh', 'onza', 'poca', 'toca']]
+ecrvantse 4 [0, 0, 0, 0, 1]
+[[], [], [], [], ['cervantes']]
+uqijoext 4 [0, 0, 0, 0, 0]
+[[], [], [], [], []]
