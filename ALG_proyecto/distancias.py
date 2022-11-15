@@ -118,16 +118,21 @@ def levenshtein_cota_optimista(x, y, threshold):
     dic = set(x)
     dic.update(set(y))
 
-    res = 0
+    res = { 1: 0,-1: 0}
 
-    for letter in dic:
-        dif = x.count(letter) - y.count(letter)
-        res += abs(dif)
+    for letra in dic:
+        dif = x.count(letra) - y.count(letra)
+        if dif < 0:
+            res[1] += abs(dif)
+        else:
+            res[-1] += abs(dif)
 
-    if res >= threshold:
-        return threshold+1
+
+    res = max(res[1], res[-1])
+    if res > threshold:
+        return threshold + 1
     else:
-        return levenshtein(x, y, threshold)
+        return levenshtein(x, y,  threshold)
 
 def damerau_restricted_matriz(x, y, threshold=None):
     # completar versión Damerau-Levenstein restringida con matriz
