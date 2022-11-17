@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# AUTORES:
-# (poner aquí el nombre o 2 nombres del equipo de prácticas
+# AUTOR:
+# Ainoa Palomino Pérez
 
 import sys
 
@@ -13,7 +13,16 @@ def langford(N):
             yield "-".join(map(str, seq))
         else:
             # buscamos una posicion para situar una pareja num
-            pass # COMPLETAR
+            # COMPLETAR
+            for i in range(0, len(seq)-1-num):
+                if seq[i] == 0 and seq[i+1+num] == 0:
+                    seq[i] = num
+                    seq[i+1+num] = num
+                    for j in backtracking(num-1):
+                        yield j         #return j --> para devolver generadores (solo se puede iterar una vez sobre ellos)
+                    seq[i] = 0
+                    seq[i+1+num] = 0
+            #pass 
 
     if N%4 in (0,3):
         yield from backtracking(N)
