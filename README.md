@@ -7,3 +7,4 @@ Para ejecutar distancias.py y ver los resultados, abrir la terminal dentro de la
 
 Carpeta Busqueda Backtracking:
 Corresponde a la Práctica 2
+
