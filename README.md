@@ -11,3 +11,22 @@ Para ejecutar distancias.py y ver los resultados, abrir la terminal dentro de la
 ### Carpeta Busqueda Backtracking:
 Corresponde a la Práctica 2
 
+Ejecutar en la terminal: python nombrefichero.py (o bien: python3 nombreFichero.py)
+
+Actividades 1 y 2:
+
+> python variacionesrep.py
+
+Actividad 3:
+
+> python exactcover.py
+
+Actividad 4:
+
+> python langford.py N (poniendo un número en N)
+
+Actividad 5:
+
+> python langford_exact_cover.py N (poniendo un número en N)
+
+
