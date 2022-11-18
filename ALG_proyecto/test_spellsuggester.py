@@ -20,7 +20,7 @@ def testear_suggester():
                   encoding='utf-8') as f:
             for palabra in bateria_test:
                 resul = []
-
+                #nueva lista longitudes
                 longitudes = []
 
                 for threshold in range(0, 4+1):

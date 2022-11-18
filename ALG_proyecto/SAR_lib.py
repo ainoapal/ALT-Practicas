@@ -6,11 +6,8 @@ from nltk.stem.snowball import SnowballStemmer
 import os
 import re
 
-## Equipo SAR compuesto por:
-## Daniil Antsyferov
-## Diego Garcia
-## Matthieu Cabrera
-## Ricardo Carrascosa
+# Codigo asignatura SAR
+
 
 class SAR_Project:
     """
@@ -496,6 +493,14 @@ class SAR_Project:
         return self.part_solve_query(query_list)
   
     def get_posting(self, term, field='article'):
+      #Se modifica para poder hacer la busqueda con tolerancia
+      #Se añade un bucle para buscar el termino en self.index y, en caso de no estar,
+      # tendría que utilizar suggest con ese termino
+      #En la lista de palabras que devuelve habrá que buscar sus posting de todas las 
+      # contenidas en la lista, mediante otro bucle
+      #Al obtener la posting list de todas las palabras, las cuales se guardan en el array 
+      # “res[i]”, se usa igual que en la versión anterior, da igual si proviene del corrector 
+      # o en el diccionario
         """
         NECESARIO PARA TODAS LAS VERSIONES
 

@@ -72,6 +72,7 @@ def levenshtein_reduccion(x, y, threshold=None):
     # COMPLETAR
 
     lenX, lenY = len(x), len(y)
+    #Se reduce el coste espacial sustituyendo la matriz (D) por las columnas necesarias
     vcurrent = np.zeros(lenX + 1, dtype=np.int)
     vnext = np.zeros(lenX + 1, dtype=np.int)
     for i in range(1, lenX + 1):
@@ -94,6 +95,7 @@ def levenshtein(x, y, threshold):
     #cualquier distancia mayor a dicho umbral.
      # COMPLETAR
     lenX, lenY = len(x), len(y)
+    #Se sustituye la matriz (D) por las columnas necesarias
     vcurrent = np.zeros(lenX + 1, dtype=np.int)
     vnext = np.zeros(lenX + 1, dtype=np.int)
     for i in range(1, lenX + 1):
@@ -115,11 +117,16 @@ def levenshtein(x, y, threshold):
 
 def levenshtein_cota_optimista(x, y, threshold):
     # COMPLETAR Y REEMPLAZAR ESTA PARTE
+
+    #Se añade a un diccionario todas las letras de ambas cadenas
     dic = set(x)
     dic.update(set(y))
 
     res = { 1: 0,-1: 0}
-
+    #Se recorre el diccionario de forma que en la variable diferencia 
+    # se suman las apariciones de dicha letra en la primera cadena y 
+    # se restan las de la segunda para después actualizar la variable 
+    # resultado con el valor absoluto de esta diferencia
     for letra in dic:
         dif = x.count(letra) - y.count(letra)
         if dif < 0:
@@ -127,7 +134,9 @@ def levenshtein_cota_optimista(x, y, threshold):
         else:
             res[-1] += abs(dif)
 
-
+    #Se comprueba si el resultado es mayor o igual que el threshold dado, 
+    # en cuyo caso se devuelve threshold+1 y si no devuelve el resultado 
+    # calculado por levenshtein
     res = max(res[1], res[-1])
     if res > threshold:
         return threshold + 1
@@ -143,6 +152,14 @@ def damerau_restricted_matriz(x, y, threshold=None):
     # COMPLETAR
     lenX, lenY = len(x), len(y)
     D = np.zeros((lenX + 1, lenY + 1))
+    '''
+    Damerau-Levenshtein incluye transposiciones
+    D(i-1,j)+1 corresponde a un borrado
+    D(i,j-1)+1 corresponde a una inserción
+    D(i-1,j-1)+1 corresponde a una coincidencia o discordancia (dependiendo de si los respectivos símbolos x e y son iguales).
+    D(i-2,j-2)+1 corresponde a una transposición
+    Se usan 3 vectores columna (en vez de los 2 usados en la versión de Levenshtein) debido a que aparece una dependencia ‘j-2’
+    '''
     for i in range(1, lenX + 1):
         D[i, 0] = i
     for j in range(1, lenY + 1):
@@ -228,8 +245,9 @@ def damerau_restricted(x, y, threshold):
     #automático que quede integrado en el recuperador.
      # COMPLETAR Y REEMPLAZAR ESTA PARTE
     lenX, lenY = len(x), len(y)
+    #Se sustituye la matriz (D) por las columnas necesarias
     vec1 = np.zeros(lenX + 1, dtype=np.int) #(la fila anterior de las distancias)
-    vec2 = np.zeros(lenX + 1, dtype=np.int)
+    vec2 = np.zeros(lenX + 1, dtype=np.int) #vector reservado para el cómputo de las siguientes columnas
     vec3 = np.zeros(lenX + 1, dtype=np.int) #(distancias de fila actuales) la calculamos con las filas previas vec0 y vec1
     for i in range(1, lenX + 1):
         vec1[i] = vec1[i - 1] + 1
@@ -292,6 +310,7 @@ def damerau_intermediate(x, y, threshold):
     # versión con reducción coste espacial y parada por threshold
     # COMPLETAR Y REEMPLAZAR ESTA PARTE
     lenX, lenY = len(x), len(y)
+    #Se utilizan 4 vectores columna en vez de 3 debido a la dependencia ‘j-3’ que aparece
     vec1 = np.zeros(lenX + 1, dtype=np.int)
     vec2 = np.zeros(lenX + 1, dtype=np.int)
     vec3 = np.zeros(lenX + 1, dtype=np.int)

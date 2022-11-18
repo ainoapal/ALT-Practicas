@@ -67,7 +67,7 @@ if __name__ == "__main__":
     searcher.set_ranking(args.rank)
     searcher.set_showall(args.all)
     searcher.set_snippet(args.snippet)
-
+    #metodo añadido que permite desactivar o activar la correccion ortografica
     searcher.set_spelling(args.spell or (args.distance is not None) or (args.threshold is not None),
                           args.distance,
                           args.threshold)

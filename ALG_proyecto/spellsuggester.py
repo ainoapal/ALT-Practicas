@@ -80,8 +80,11 @@ class SpellSuggester:
 
         resul =[]
         newresul =[]
+        #mismos nombres que en resultado_test_spellsuggester
         #nombres cogidos de levensthein_m
-        for palabra in self.vocabulary:
+        for palabra in self.vocabulary: #devuelve una lista de lista de palabras
+            #la lista i-ésima contiene las palabras a distancia i 
+            # (para i hasta threshold incluido)
             if distance=="levenshtein_m":
                 if distancias.levenshtein_matriz(term,palabra,threshold)==threshold:
                     newresul .append(palabra)
@@ -107,8 +110,9 @@ class SpellSuggester:
                 if distancias.damerau_intermediate(term,palabra,threshold)==threshold:
                     newresul .append(palabra)
             
-        if flatten:
+        if flatten: #si flatten=True (opcion por defecto) --> devuelve lista
             newresul  = [word for wlist in resul  for word in wlist]
-            
+        #devuelve un diccionario donde para cada distancia de edición tiene ligada 
+        #la lista de palabras que estan a esa distancia
         return newresul 
 
