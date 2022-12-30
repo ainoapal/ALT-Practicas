@@ -1,6 +1,7 @@
 import numpy as np
 import heapq
 import collections
+from collections import namedtuple
 
 ######################################################################
 #
@@ -18,6 +19,7 @@ def genera_instancia(M, low=1, high=1000):
 #
 ######################################################################
 
+# Función que calcula el coste de una solución
 def compute_score(costMatrix, solution):
     return sum(costMatrix[pieza,instante]
                for pieza,instante in enumerate(solution))
@@ -239,7 +241,13 @@ cjtAlgoritmos = {'naif': naive_solution,
                  'x_coste': voraz_x_coste,
                  'combina': voraz_combina,
                  'RyP': functionRyP}
-
+# Se le da a los algoritmos el mismo nombre que en las diapositivas (Diapo 19/19)
+cjtAlgoritmosRyP = {'naif+RyP': naive_solution,
+                 'x_pieza+RyP': voraz_x_pieza,
+                 'x_instante+RyP': voraz_x_instante,
+                 'x_coste+RyP': voraz_x_coste,
+                 'combina+RyP': voraz_combina,
+                 'RyP': functionRyP}
 
 def probar_ejemplo():
     ejemplo = np.array([[7, 3, 7, 2],
@@ -250,6 +258,7 @@ def probar_ejemplo():
     for label,function in cjtAlgoritmos.items():
         score,solution = function(ejemplo)
         print(f'Algoritmo {label:10}', solution, score)
+
 
 def comparar_algoritmos():
     print('talla',end=' ')
@@ -269,33 +278,36 @@ def comparar_algoritmos():
             media = dtalla[label]/numInstancias
             print(f'{media:10.2f}', end=' ')
         print()
-'''
-def comparar_sol_inicial(costMatrix):
-    stats = []
-    for initial_sol in [None, np.random.permutation(costMatrix.shape[0]),
-        naive_solution(costMatrix)[1]]:
-        ensamblaje = Ensamblaje(costMatrix, initial_sol)
-        ensamblaje.solve()
-        stats.append({'initial_sol': initial_sol,
-        'iterations': ensamblaje.stats['iterations'],
-        'gen_states': ensamblaje.stats['gen_states'],
-        'podas_opt': ensamblaje.stats['podas_opt'],
-        'maxA': ensamblaje.stats['maxA']})
-    return stats
 
-
-soluciones_iniciales = [None, voraz_x_coste(costMatrix)[1], voraz_x_iteraciones(costMatrix)[1], voraz_x_estados_generados(costMatrix)[1]]
-resultados = comparar_sol_inicial(costMatrix, soluciones_iniciales)
-'''
-
-def comparar_sol_inicial(costMatrix, soluciones_iniciales):
-    resultados = []
-    for sol_inicial in soluciones_iniciales:
-        ensamblaje = Ensamblaje(costMatrix, initial_sol=sol_inicial)
-        resultados.append(ensamblaje.solve())
-    return resultados
-
-
+def comparar_sol_inicial():
+    ejemplo = np.array([[7, 3, 7, 2],
+                        [9, 9, 4, 1],
+                        [9, 4, 8, 1],
+                        [3, 4, 8, 4]], dtype=int)
+    bb = Ensamblaje(ejemplo)
+    fx, x, stats = bb.solve()
+    numInstancias = 10
+    for st in stats:
+        print(st.center(70,"-"))
+        print('talla',end=' ')
+        for label in cjtAlgoritmosRyP:
+            print(f'{label:>10}',end=' ')
+        print()
+        for talla in range(5,15+1):
+            dtalla = collections.defaultdict(float)
+            for instancia in range(numInstancias):
+                cM = genera_instancia(talla)
+                for lab in cjtAlgoritmosRyP:
+                    score,sol = cjtAlgoritmosRyP[lab](cM)
+                    e = Ensamblaje(cM,sol)
+                    fx,x,stats = e.solve()
+                    dtalla[lab] += stats[st]
+            print(f'{talla:>5}',end=' ')
+            for label in cjtAlgoritmosRyP:
+                media = dtalla[label]/numInstancias
+                print(f'{media:10.2f}', end=' ')
+            print()
+        
 
 def probar_ryp():
     ejemplo = np.array([[7, 3, 7, 2],
@@ -315,11 +327,6 @@ def probar_ryp():
 #
 ######################################################################
 
-def main():
-    costMatrix = genera_instancia(M=4)
-    soluciones_iniciales = [None, voraz_x_coste(costMatrix)[1], voraz_x_iteraciones(costMatrix)[1], voraz_x_estados_generados(costMatrix)[1]]
-    resultados = comparar_sol_inicial(costMatrix, soluciones_iniciales)
-    print(resultados)
 
 if __name__ == '__main__':
     probar_ejemplo()
@@ -327,10 +334,6 @@ if __name__ == '__main__':
     probar_ryp()
     print('-'*70)
     comparar_algoritmos()
-    main()
-    '''
-    costMatrix = genera_instancia(M=4)
-    soluciones_iniciales = [None, voraz_x_coste(costMatrix)[1], voraz_x_iteraciones(costMatrix)[1], voraz_x_estados_generados(costMatrix)[1]]
-    resultados = comparar_sol_inicial(costMatrix, soluciones_iniciales)
-    print(resultados)
-    '''
+    comparar_sol_inicial()
+    
+
