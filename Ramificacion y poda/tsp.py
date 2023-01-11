@@ -1,14 +1,13 @@
 ######################################################################
 # Práctica realizada por:
 # - COMPLETAR
-# -Ainoa Palomino Pérez - apalper
+# - Ainoa Palomino Pérez - apalper
 ######################################################################
 
 import time
 import math
 import numpy as np
 import collections
-import ensamblaje
 
 class DiGraph:
     '''
@@ -408,15 +407,13 @@ class BranchBoundExplicit:
         
         return self.fx, self.x, stats
 
-class TSP:  #Travelling Salesman Problem
+class TSP:
 
     def __init__(self, graph, first_vertex=0):
         self.G = graph # DiGraph
         self.first_vertex = first_vertex
         self.fx = float('inf')
         self.x = None
-        self.c0 = self.first_vertex
-        self.n = len(self.G.V) # Asignamos a self.n el número de vértices del grafo
         
     def is_complete(self, s):
         '''
@@ -474,48 +471,44 @@ class TSP_Cota4(TSP):
     # COMPLETAR
 
     def initial_solution(self):
-        # solucion inicial: visitar las ciudades en orden 0,1,...,n-1
-        #return self.first_vertex, [i for i in range(1,self.n)] 
-        return self.c0, [i for i in range(1,self.n)] 
-        #slef.c0 -> c0 se refiere a la ciudad de comienzo del ciclo Hamiltoniano
-    
-    def is_complete(self,s):
-        # una solucion es completa si no quedan ciudades por visitar
-        _, pendientes = s
-        return len(pendientes) == 0
-    
-    def is_factible(self,s):
-        # una solución es factible si la distancia recorrida es menor que
-        # la cota de la solución (cota 4)
-        coste,_ = s
-        return coste < self.cota4()
-    
-    def get_factible_state(self, coste, s):
-        # una vez que se ha encontrado una solución factible, se calcula 
-        # el coste real y se devuelve la solución con el coste real
-        _,visitadas = s
-        visitadas.append(0) # volvemos a la ciudad inicial
-        return self.coste_real(visitadas), (self.coste_real(visitadas), visitadas)
-    
-    def cota4(self):
-        # cota 4: coste mínimo desde cada ciudad no visitada hasta la ciudad
-        # inicial más el coste mínimo desde la ciudad inicial hasta cada 
-        # ciudad no visitada
-        _, pendientes = self.s
-        coste = 0
-        for ciudad in pendientes:
-            coste += min(self.distancias[ciudad][0], self.distancias[0][ciudad])
-        return coste
-    
-    def branch(self, coste, s):
-        # genera las ramas que parten de una solución
-        ciudad, pendientes = s
-        for ciudad_nueva in pendientes:
-            pendientes_nuevas = [c for c in pendientes if c != ciudad_nueva]
-            coste_nuevo = coste + self.distancias[ciudad][ciudad_nueva]
-            yield coste_nuevo, (ciudad_nueva, pendientes_nuevas)
+        initial = [ self.first_vertex ]
+        initial_score = 0
+        for v in self.G.nodes():
+            initial_score += self.G.lowest_out_weight(v)
+        return (initial_score, initial)
 
+    def branch(self, s_score, s):
+        '''
+        s_score es el score de s
+        s es una solución parcial
+        '''
+        lastvertex = s[-1]
+        for v,w in self.G.edges_from(lastvertex):
+            if v not in s:
+                yield (s_score + w, s+[v])
+    '''
+    # Creo que está mal // Opcion 2
+    def initial_solution(self):
+        initial = [ self.first_vertex ]
+        initial_score = 0
+        return (initial_score, initial)
 
+    def branch(self, s_score, s):
+        #s_score es el score de s
+        #s es una solución parcial
+        lastvertex = s[-1]
+        minCostFound = None
+        bestNodeFound = None
+        for v,w in self.G.edges_from(lastvertex):
+            if v not in s:
+                if minCostFound == None:
+                    minCostFound = w
+                    bestNodeFound = v
+                elif w < minCostFound:
+                    minCostFound = w
+                    bestNodeFound = v                         
+        yield (s_score + minCostFound, s+[bestNodeFound])
+    '''
 
 class TSP_Cota5(TSP):
     '''
@@ -529,46 +522,24 @@ class TSP_Cota5(TSP):
     # COMPLETAR
 
     def initial_solution(self):
-        # solucion inicial: visitar las ciudades en orden 0,1,...,n-1
-        #return self.first_vertex, [i for i in range(1,self.n)] 
-        return self.c0, [i for i in range(1,self.n)]
-    
-    def is_complete(self,s):
-        # una solucion es completa si no quedan ciudades por visitar
-        _, pendientes = s
-        return len(pendientes) == 0
-    
-    def is_factible(self,s):
-        # una solución es factible si la distancia recorrida es menor que
-        # la cota de la solución (cota 5)
-        coste,_ = s
-        return coste < self.cota5()
-    
-    def get_factible_state(self, coste, s):
-        # una vez que se ha encontrado una solución factible, se calcula 
-        # el coste real y se devuelve la solución con el coste real
-        _,visitadas = s
-        visitadas.append(0) # volvemos a la ciudad inicial
-        return self.coste_real(visitadas), (self.coste_real(visitadas), visitadas)
-    
-    def cota5(self):
-        # cota 5: suma de la distancia desde la ciudad inicial a la ciudad
-        # más lejana no visitada más la distancia desde esa ciudad más lejana
-        # a la ciudad más cercana no visitada
-        _, pendientes = self.s
-        max_dist = max([self.distancias[self.c0][c] for c in pendientes])
-        #max_dist = max([self.distancias[self.first_vertex][c] for c in pendientes])
-        min_dist = min([min([self.distancias[c1][c2] for c2 in pendientes if c2 != c1])
-                        for c1 in pendientes])
-        return max_dist + min_dist
-    
-    def branch(self, coste, s):
-        # genera las ramas que parten de una solución
-        ciudad, pendientes = s
-        for ciudad_nueva in pendientes:
-            pendientes_nuevas = [c for c in pendientes if c != ciudad_nueva]
-            coste_nuevo = coste + self.distancias[ciudad][ciudad_nueva]
-            yield coste_nuevo, (ciudad_nueva, pendientes_nuevas)
+        initial = [ self.first_vertex ]
+        initial_score = 0
+        for v in self.G.nodes():
+            initial_score += self.G.lowest_out_weight(v)
+        return (initial_score, initial)
+
+    def branch(self, s_score, s):
+        #s_score es el score de s
+        #s es una solución parcial
+        lastvertex = s[-1]
+        for v, w in self.G.edges_from(lastvertex):
+            if v not in s:
+                bestNodeFound = 0
+                for v2 in self.G.nodes():
+                    if v2 not in s:
+                        bestNodeFound += self.G.lowest_out_weight(v2, s[1:]+[v])
+                s_score = self.G.path_weight(s+[v]) # el camino
+                yield (s_score + bestNodeFound, s+[v])
     
 
 class TSP_Cota6(TSP):
@@ -584,49 +555,25 @@ class TSP_Cota6(TSP):
     
     #pass
     # COMPLETAR
-
+    
     def initial_solution(self):
-        # solucion inicial: visitar las ciudades en orden 0,1,...,n-1
-        #return self.first_vertex, [i for i in range(1,self.n)] 
-        return self.c0, [i for i in range(1,self.n)]
-    
-    def is_complete(self,s):
-        # una solucion es completa si no quedan ciudades por visitar
-        _, pendientes = s
-        return len(pendientes) == 0
-    
-    def is_factible(self,s):
-        # una solución es factible si la distancia recorrida es menor que
-        # la cota de la solución (cota 6)
-        coste,_ = s
-        return coste < self.cota6()
-    
-    def get_factible_state(self, coste, s):
-        # una vez que se ha encontrado una solución factible, se calcula 
-        # el coste real y se devuelve la solución con el coste real
-        _,visitadas = s
-        visitadas.append(0) # volvemos a la ciudad inicial
-        return self.coste_real(visitadas), (self.coste_real(visitadas), visitadas)
-    
-    def cota6(self):
-        # cota 6: coste mínimo desde cada ciudad no visitada hasta la ciudad
-        # inicial más el coste mínimo desde la ciudad inicial hasta cada 
-        # ciudad no visitada, más el coste mínimo entre todas las ciudades
-        # no visitadas
-        _, pendientes = self.s
-        coste = 0
-        for ciudad in pendientes:
-            coste += min(self.distancias[ciudad][otra] for otra in [0] + pendientes if otra != ciudad)
-        return coste
-    
-    def branch(self, coste, s):
-        # genera las ramas que parten de una solución
-        ciudad, pendientes = s
-        for ciudad_nueva in pendientes:
-            pendientes_nuevas = [c for c in pendientes if c != ciudad_nueva]
-            coste_nuevo = coste + self.distancias[ciudad][ciudad_nueva]
-            yield coste_nuevo, (ciudad_nueva, pendientes_nuevas)
+        initial = [ self.first_vertex ]
+        initial_score = 0
+        for v in self.G.nodes():
+            initial_score += self.G.lowest_out_weight(v)
+        return (initial_score, initial)
 
+    def branch(self, s_score, s):
+        #s_score es el score de s
+        #s es una solución parcial
+        lastvertex = s[-1]
+        distances, _ = self.G.Dijkstra(self.first_vertex, reverse=True)
+        for v, w in self.G.edges_from(lastvertex):
+            if v not in s:
+                final_cost = distances[v]
+                yield (s_score + w + final_cost, s + [v])
+   
+    
 
 class TSP_Cota7(TSP):
     '''
@@ -641,48 +588,22 @@ class TSP_Cota7(TSP):
     # COMPLETAR
 
     def initial_solution(self):
-        # solucion inicial: visitar las ciudades en orden 0,1,...,n-1
-        #return self.first_vertex, [i for i in range(1,self.n)] 
-        return self.c0, [i for i in range(1,self.n)]
-    
-    def is_complete(self,s):
-        # una solucion es completa si no quedan ciudades por visitar
-        _, pendientes = s
-        return len(pendientes) == 0
-    
-    def is_factible(self,s):
-        # una solución es factible si la distancia recorrida es menor que
-        # la cota de la solución (cota 7)
-        coste,_ = s
-        return coste < self.cota7()
-    
-    def get_factible_state(self, coste, s):
-        # una vez que se ha encontrado una solución factible, se calcula 
-        # el coste real y se devuelve la solución con el coste real
-        _,visitadas = s
-        visitadas.append(0) # volvemos a la ciudad inicial
-        return self.coste_real(visitadas), (self.coste_real(visitadas), visitadas)
-    
-    def cota7(self):
-        # cota 7: suma de la distancia más corta entre dos ciudades no
-        # visitadas y la distancia más corta entre una ciudad no visitada
-        # y una visitada
-        _, pendientes = self.s
-        min_dist = min([min([self.distancias[c1][c2] for c2 in pendientes if c2 != c1])
-                        for c1 in pendientes])
-        min_dist_2 = min([min([self.distancias[c1][c2] for c2 in self.visitadas])
-                          for c1 in pendientes])
-        return min_dist + min_dist_2
-    
-    def branch(self, coste, s):
-        # genera las ramas que parten de una solución
-        ciudad, pendientes = s
-        for ciudad_nueva in pendientes:
-            pendientes_nuevas = [c for c in pendientes if c != ciudad_nueva]
-            coste_nuevo = coste + self.distancias[ciudad][ciudad_nueva]
-            yield coste_nuevo, (ciudad_nueva, pendientes_nuevas)
+        initial = [ self.first_vertex ]
+        initial_score = 0
+        return (initial_score, initial)
 
+    def branch(self, s_score, s):
+        #s_score es el score de s
+        #s es una solución parcial
+        lastvertex = s[-1]
+        visited = set(s)
+        for v, w in self.G.edges_from(lastvertex):
+            if v not in visited:
+                final_cost = self.G.Dijkstra1dst(v, self.first_vertex, visited)
+                yield (s_score + w + final_cost, s + [v])
+    
 
+    
 
 
 ######################################################################
@@ -721,17 +642,17 @@ class TSP_Cota7I(TSP_Cota7, BranchBoundImplicit):
 class TSP_Cota7E(TSP_Cota7, BranchBoundExplicit):
     pass
 
-
+# ir descomentando a medida que se implementen las cotas
 repertorio_cotas = [('Cota1I',TSP_Cota1I),
-                    ('Cota1E',TSP_Cota1E),
-                    ('Cota4I',TSP_Cota4I),
-                    ('Cota4E',TSP_Cota4E),
-                    ('Cota5I',TSP_Cota5I),
-                    ('Cota5E',TSP_Cota5E),
-                    ('Cota6I',TSP_Cota6I),
-                    ('Cota6E',TSP_Cota6E),
-                    ('Cota7I',TSP_Cota7I),
-                    ('Cota7E',TSP_Cota7E)
+                     ('Cota1E',TSP_Cota1E),
+                     ('Cota4I',TSP_Cota4I),
+                     ('Cota4E',TSP_Cota4E),
+                     ('Cota5I',TSP_Cota5I),
+                     ('Cota5E',TSP_Cota5E),
+                     ('Cota6I',TSP_Cota6I),
+                     ('Cota6E',TSP_Cota6E),
+                     ('Cota7I',TSP_Cota7I),
+                     ('Cota7E',TSP_Cota7E)
                     ]
 
 ######################################################################
@@ -795,65 +716,7 @@ def experimento():
     '''
 
     # COMPLETAR
-    #pass
-
-    repertorio_algoritmos = {'naif': ensamblaje.naive_solution,
-                 'x_pieza': ensamblaje.voraz_x_pieza,
-                 'x_instante': ensamblaje.voraz_x_instante,
-                 'x_coste': ensamblaje.voraz_x_coste,
-                 'combina': ensamblaje.voraz_combina,
-                 'RyP': ensamblaje.functionRyP}
-
-    repertorio_cotas = [('Cota1I',TSP_Cota1I),
-                    ('Cota1E',TSP_Cota1E),
-                    ('Cota4I',TSP_Cota4I),
-                    ('Cota4E',TSP_Cota4E),
-                    ('Cota5I',TSP_Cota5I),
-                    ('Cota5E',TSP_Cota5E),
-                    ('Cota6I',TSP_Cota6I),
-                    ('Cota6E',TSP_Cota6E),
-                    ('Cota7I',TSP_Cota7I),
-                    ('Cota7E',TSP_Cota7E)
-                    ]
-
-    # Realizamos un bucle para probar cada talla de problemas TSP
-    for nV in range(10,21):
-        # generate instances of TSP problems
-        instancias = []
-        seed = seeds[nV][0]
-        for i in range(5):
-            seed = seeds[nV][i]
-            instancias.append(generate_random_digraph_1scc(nV, seed=seed))
-        
-        resultados = collections.defaultdict(list)
-        
-        # Realizamos un bucle para probar cada algoritmo de búsqueda en cada instancia
-        for instancia in instancias:
-            for nombre,algoritmo in repertorio_algoritmos.items():
-                t0 = time.perf_counter()
-                score,solution = algoritmo(instancia)
-                t1 = time.perf_counter()
-                if solution is not None:
-                    resultados[nombre].append(score)
-                else:
-                    resultados[nombre].append(float('inf'))
-                
-        # Realizamos un bucle para probar cada algoritmo de cota con ramificación y poda en cada instancia
-        for instancia in instancias:
-            for nombre,cota in repertorio_cotas.items():
-                t0 = time.perf_counter()
-                tspi = cota(instancia)
-                fx,x,stats = tspi.solve()
-                t1 = time.perf_counter()
-                if x is not None:
-                    resultados[nombre].append(fx)
-                else:
-                    resultados[nombre].append(float('inf'))
-                    
-        # Imprime los rsultados para la talla de los problemas TSP
-        print(f'\nTalla {nV}:')
-        for nombre,valores in resultados.items():
-            print(f'{nombre}: {sum(valores)/len(valores)}')
+    pass
 
 
 
@@ -893,6 +756,65 @@ def prueba_mini():
         fx,x,stats = tspi.solve()
         print(fx,x,stats)
 
+
+
+ejemplo_mediano = """
+FORMAT 10 43
+e 0 4 84637
+e 0 3 113623
+e 0 6 115689
+e 0 8 28989
+e 0 1 92751
+e 1 3 39631
+e 1 7 44708
+e 1 6 26841
+e 2 3 69204
+e 2 5 92466
+e 2 4 80275
+e 3 0 102668
+e 3 9 852
+e 3 6 17788
+e 3 1 40001
+e 3 4 22637
+e 3 5 34081
+e 4 1 11291
+e 4 5 30120
+e 4 2 63483
+e 5 6 16878
+e 5 1 29329
+e 5 7 68026
+e 5 4 26577
+e 5 0 92391
+e 5 2 92195
+e 6 4 12293
+e 6 7 59774
+e 6 5 16209
+e 7 3 79204
+e 7 2 126610
+e 7 9 76392
+e 7 8 91416
+e 7 1 57764
+e 7 0 71665
+e 8 2 95620
+e 8 9 132896
+e 8 3 110810
+e 8 1 95677
+e 8 4 94689
+e 9 4 26070
+e 9 2 78506
+e 9 1 40074
+
+"""
+
+def prueba_mediana():
+    g = load_dimacs_graph(ejemplo_mediano)
+    for nombre,clase in repertorio_cotas:
+        print(f'----- checking {nombre} -----')
+        tspi = clase(g)
+        fx,x,stats = tspi.solve()
+        print(fx,x,stats)
+
+
 ######################################################################
 #
 #                            MAIN
@@ -900,7 +822,8 @@ def prueba_mini():
 ######################################################################
             
 if __name__ == '__main__':
-    prueba_mini()
+    #prueba_mini()
+    prueba_mediana()
     # prueba_generador()
     # experimento()
 
