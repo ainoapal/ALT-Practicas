@@ -8,6 +8,8 @@ import time
 import math
 import numpy as np
 import collections
+import random
+from collections import defaultdict
 
 class DiGraph:
     '''
@@ -716,8 +718,89 @@ def experimento():
     '''
 
     # COMPLETAR
-    pass
+    #pass
 
+    # Establecemos un rango de tallas a probar
+    for nV in range(10, 21):
+        # Diccionario para almacenar los resultados de cada cota
+        resultados = defaultdict(list)
+
+        # Generamos entre 5 y 20 instancias para cada talla
+        for i in range(5, 21):
+            # Establecemos una semilla para asegurarnos de tener una componente fuertemente conexa
+            random.seed(seeds[nV][i])
+            g = generate_random_digraph_1scc(nV)
+            
+            # Probar cada cota
+            for nombre, clase in repertorio_cotas:
+                tspi = clase(g)
+                fx, x, stats = tspi.solve()
+                if x is not None:
+                    resultados[nombre].append(fx)
+            
+        # Mostrar valores medios para cada cota
+        for nombre, valores in resultados.items():
+            print(f"{nombre} - Talla {nV}: {sum(valores) / len(valores)}")
+
+    '''
+    repertorio_algoritmos = {'naif': ensamblaje.naive_solution,
+                 'x_pieza': ensamblaje.voraz_x_pieza,
+                 'x_instante': ensamblaje.voraz_x_instante,
+                 'x_coste': ensamblaje.voraz_x_coste,
+                 'combina': ensamblaje.voraz_combina,
+                 'RyP': ensamblaje.functionRyP}
+
+    repertorio_cotas = [('Cota1I',TSP_Cota1I),
+                    ('Cota1E',TSP_Cota1E),
+                    ('Cota4I',TSP_Cota4I),
+                    ('Cota4E',TSP_Cota4E),
+                    ('Cota5I',TSP_Cota5I),
+                    ('Cota5E',TSP_Cota5E),
+                    ('Cota6I',TSP_Cota6I),
+                    ('Cota6E',TSP_Cota6E),
+                    ('Cota7I',TSP_Cota7I),
+                    ('Cota7E',TSP_Cota7E)
+                    ]
+
+    # Realizamos un bucle para probar cada talla de problemas TSP
+    for nV in range(10,21):
+        # generate instances of TSP problems
+        instancias = []
+        seed = seeds[nV][0]
+        for i in range(5):
+            seed = seeds[nV][i]
+            instancias.append(generate_random_digraph_1scc(nV, seed=seed))
+        
+        resultados = collections.defaultdict(list)
+        
+        # Realizamos un bucle para probar cada algoritmo de búsqueda en cada instancia
+        for instancia in instancias:
+            for nombre,algoritmo in repertorio_algoritmos.items():
+                t0 = time.perf_counter()
+                score,solution = algoritmo(instancia)
+                t1 = time.perf_counter()
+                if solution is not None:
+                    resultados[nombre].append(score)
+                else:
+                    resultados[nombre].append(float('inf'))
+                
+        # Realizamos un bucle para probar cada algoritmo de cota con ramificación y poda en cada instancia
+        for instancia in instancias:
+            for nombre,cota in repertorio_cotas.items():
+                t0 = time.perf_counter()
+                tspi = cota(instancia)
+                fx,x,stats = tspi.solve()
+                t1 = time.perf_counter()
+                if x is not None:
+                    resultados[nombre].append(fx)
+                else:
+                    resultados[nombre].append(float('inf'))
+                    
+        # Imprime los rsultados para la talla de los problemas TSP
+        print(f'\nTalla {nV}:')
+        for nombre,valores in resultados.items():
+            print(f'{nombre}: {sum(valores)/len(valores)}')
+    '''
 
 
 ######################################################################
@@ -824,6 +907,6 @@ def prueba_mediana():
 if __name__ == '__main__':
     #prueba_mini()
     prueba_mediana()
-    # prueba_generador()
-    # experimento()
+    prueba_generador()
+    experimento()
 
