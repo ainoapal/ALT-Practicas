@@ -561,19 +561,18 @@ class TSP_Cota6(TSP):
     def initial_solution(self):
         initial = [ self.first_vertex ]
         initial_score = 0
-        for v in self.G.nodes():
-            initial_score += self.G.lowest_out_weight(v)
         return (initial_score, initial)
 
     def branch(self, s_score, s):
         #s_score es el score de s
         #s es una solución parcial
         lastvertex = s[-1]
-        distances, _ = self.G.Dijkstra(self.first_vertex, reverse=True)
+        distances = self.G.Dijkstra(self.first_vertex, reverse=True)[0]
         for v, w in self.G.edges_from(lastvertex):
             if v not in s:
-                final_cost = distances[v]
-                yield (s_score + w + final_cost, s + [v])
+                knownPath = s_score + w
+                final_cost = knownPath + distances[v] - distances[lastvertex]
+                yield (final_cost, s+[v])
    
     
 
